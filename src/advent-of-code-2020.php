@@ -8,6 +8,7 @@ use maesierra\AdventOfCode2020\Day5;
 use maesierra\AdventOfCode2020\Day6;
 use maesierra\AdventOfCode2020\Day7;
 use maesierra\AdventOfCode2020\Day8;
+use maesierra\AdventOfCode2020\Day9;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -114,5 +115,11 @@ $app->add(runQuestion(8, 1, function($file) {
 }));
 $app->add(runQuestion(8, 2, function($file) {
     return (new Day8())->question2($file);
+}));
+$app->add(runQuestion(9, 1, function($file) {
+    return (new Day9())->question1($file, 25);
+}));
+$app->add(runQuestion(9, 2, function($file) {
+    return (new Day9())->question2($file, 675280050);
 }));
 $app->run();

@@ -1,6 +1,7 @@
 <?php
 
 use maesierra\AdventOfCode2020\Day1;
+use maesierra\AdventOfCode2020\Day10;
 use maesierra\AdventOfCode2020\Day2;
 use maesierra\AdventOfCode2020\Day3;
 use maesierra\AdventOfCode2020\Day4;
@@ -121,5 +122,8 @@ $app->add(runQuestion(9, 1, function($file) {
 }));
 $app->add(runQuestion(9, 2, function($file) {
     return (new Day9())->question2($file, 675280050);
+}));
+$app->add(runQuestion(10, 1, function($file) {
+    return (new Day10())->question1($file);
 }));
 $app->run();

@@ -126,4 +126,7 @@ $app->add(runQuestion(9, 2, function($file) {
 $app->add(runQuestion(10, 1, function($file) {
     return (new Day10())->question1($file);
 }));
+$app->add(runQuestion(10, 2, function($file) {
+    return (new Day10())->question2($file);
+}));
 $app->run();

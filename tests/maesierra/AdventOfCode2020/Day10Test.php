@@ -64,7 +64,7 @@ class Day10Test extends TestCase {
     }
 
     public function testQuestion2() {
-        $this->assertEquals(8, (new Day10())->question2(__DIR__ . DIRECTORY_SEPARATOR . "Day10_1.txt"));
         $this->assertEquals(19208, (new Day10())->question2(__DIR__ . DIRECTORY_SEPARATOR . "Day10_2.txt"));
+        $this->assertEquals(8, (new Day10())->question2(__DIR__ . DIRECTORY_SEPARATOR . "Day10_1.txt"));
     }
 }

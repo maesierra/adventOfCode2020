@@ -24,13 +24,19 @@ class Node {
         $this->parent = $parent;
     }
 
-    public function count() {
+
+    public function expand(&$acc = []) {
         if (!$this->next) {
-            return 1;
+            $node = $this;
+            while ($node) {
+                $branch[] = $node->value;
+                $node = $node->parent;
+            }
+            $acc[] = $branch;
         } else {
-            return array_reduce($this->next, function($sum, $node) {
-                return $sum + $node->count();
-            }, 0);
+            foreach ($this->next as $node) {
+                $node->expand($acc);
+            }
         }
     }
 
@@ -40,6 +46,7 @@ class Day10 {
 
     public $cache = [];
     public $nodeCache = [];
+    public $countCache = [];
 
 
     /**
@@ -61,7 +68,10 @@ class Day10 {
     public function question2(string $inputFile):int {
         $numbers = explode("\n", file_get_contents($inputFile));
         sort($numbers);
-        return $this->countChains($numbers);
+        $numbers[] = end($numbers) + 3;
+        $this->countCache = [];
+        $node = $this->createTree($numbers);
+        return $this->count($node);
     }
 
 
@@ -117,29 +127,45 @@ class Day10 {
 
 
 
-    public function createTree( array $chain, $parent = null) {
-        $startingValue = $chain[0];
-        $result = $this->nodeCache[$startingValue] ?? null;
+    public function createTree( array $chain, $parent = null):Node {
+        $current = $chain[0];
+        $result = $this->nodeCache[$current] ?? null;
         if ($result) {
             return $result;
         }
         if (count($chain) == 2) {
-            return  new Node($chain[1], $parent);
+            $node = new Node($chain[0], $parent);
+            $node->next = [new Node($chain[1], $node)];
+            $this->nodeCache[$current] = $node;
+            return $node;
         }
-        $candidates = array_filter(array_slice($chain, 1, 3), function($n) use($startingValue) {
-            $diff = $n - $startingValue;
+        $candidates = array_filter(array_slice($chain, 1, 3), function($n) use($current) {
+            $diff = $n - $current;
             return $diff >= 1 && $diff <= 3;
         });
-        $node = new Node($startingValue, $parent);
+        $node = new Node($current, $parent);
         $node->next = array_map(function($next) use ($chain, $node) {
             return $this->createTree(array_slice($chain, array_search($next, $chain)), $node);
         }, $candidates);
-        $this->nodeCache[$startingValue] = $result;
+        $this->nodeCache[$current] = $node;
         return $node;
     }
 
-    public function countChains(array $chains) {
-        $tree = $this->createTree($chains);
-        return $tree->count();
+    public function count(Node $node) {
+        echo "counting node {$node->value}...\n";
+        $result = $this->countCache[$node->value] ?? 0;
+        if (!$result) {
+            if (!$node->next) {
+                $result = 1;
+            } else {
+                $result = array_reduce($node->next, function ($sum, $n) {
+                    return $sum + $this->count($n);
+                }, 0);
+            }
+            $this->countCache[$node->value] = $result;
+        }
+        echo "counting node {$node->value} => $result\n";
+        return $result;
     }
+
 }

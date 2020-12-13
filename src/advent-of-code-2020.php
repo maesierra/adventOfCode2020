@@ -4,6 +4,7 @@ use maesierra\AdventOfCode2020\Day1;
 use maesierra\AdventOfCode2020\Day10;
 use maesierra\AdventOfCode2020\Day11;
 use maesierra\AdventOfCode2020\Day12;
+use maesierra\AdventOfCode2020\Day13;
 use maesierra\AdventOfCode2020\Day2;
 use maesierra\AdventOfCode2020\Day3;
 use maesierra\AdventOfCode2020\Day4;
@@ -143,5 +144,14 @@ $app->add(runQuestion(12, 1, function($file) {
 $app->add(runQuestion(12, 2, function($file) {
     return (new Day12())->question2($file);
 }));
-
+$app->add(runQuestion(13, 1, function($file) {
+    $res = (new Day13())->question1($file);
+    $id = array_keys($res)[0];
+    $wait = array_values($res)[0];
+    echo "BUS $id => $wait\n";
+    return $id * $wait;
+}));
+$app->add(runQuestion(13, 2, function($file) {
+    return (new Day13())->question2($file);
+}));
 $app->run();

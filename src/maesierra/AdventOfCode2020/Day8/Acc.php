@@ -19,6 +19,6 @@ class Acc extends Instruction {
      * @inheritDoc
      */
     public function run(Runtime $runtime) {
-        $runtime->accumulator += $this->value;
+        $runtime->variables['acc'] += $this->value;
     }
 }

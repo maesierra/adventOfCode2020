@@ -49,7 +49,8 @@ class Day8 {
      * @return int
      */
     public function question1($inputFile): int {
-        return (new Runtime($this->parseInstructions($inputFile)))->run();
+        $instructions = $this->parseInstructions($inputFile);
+        return $this->createRuntime($instructions)->run()['acc'];
     }
 
     /**
@@ -67,12 +68,21 @@ class Day8 {
             echo "Attempt swapping $pos $instruction => $new\n";
             $newSet = $instructions;
             $newSet[$pos] = $new;
-            $runtime = new Runtime($newSet);
-            $accumulator = $runtime->run();
+            $runtime = $this->createRuntime($newSet);
+            $accumulator = $runtime->run()['acc'];
             if ($runtime->success) {
                 return $accumulator;
             }
         }
         return 0;
+    }
+
+    /**
+     * @param array $instructions
+     * @return Runtime
+     */
+    public function createRuntime(array $instructions): Runtime
+    {
+        return (new Runtime($instructions, ['acc' => 0]));
     }
 }

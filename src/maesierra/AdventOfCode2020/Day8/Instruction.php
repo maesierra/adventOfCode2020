@@ -15,9 +15,10 @@ abstract class Instruction {
 
     /**
      * Instruction constructor.
-     * @param string $name
+     * @param string|int $name
+     * @param $value
      */
-    public function __construct(string $name, int $value) {
+    public function __construct(string $name, $value) {
         $this->name = $name;
         $this->value = $value;
         $this->count = 0;

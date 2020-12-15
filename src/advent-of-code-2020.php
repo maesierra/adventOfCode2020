@@ -6,6 +6,7 @@ use maesierra\AdventOfCode2020\Day11;
 use maesierra\AdventOfCode2020\Day12;
 use maesierra\AdventOfCode2020\Day13;
 use maesierra\AdventOfCode2020\Day14;
+use maesierra\AdventOfCode2020\Day15;
 use maesierra\AdventOfCode2020\Day2;
 use maesierra\AdventOfCode2020\Day3;
 use maesierra\AdventOfCode2020\Day4;
@@ -57,7 +58,7 @@ function runQuestion($day, $question, $run)
             $this->setDescription("Runs day {$this->day} question {$this->question}")
                 ->addArgument(
                     'file',
-                    InputArgument::REQUIRED,
+                    InputArgument::OPTIONAL,
                     'File to process'
                 );
 
@@ -160,5 +161,11 @@ $app->add(runQuestion(14, 1, function($file) {
 }));
 $app->add(runQuestion(14, 2, function($file) {
     return (new Day14())->question2($file);
+}));
+$app->add(runQuestion(15, 1, function($file) {
+    return (new Day15([13,0,10,12,1,5,8]))->nThPosition(2020);
+}));
+$app->add(runQuestion(15, 2, function($file) {
+    return (new Day15([13,0,10,12,1,5,8]))->nThPosition(30000000);
 }));
 $app->run();

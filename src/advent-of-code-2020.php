@@ -10,6 +10,7 @@ use maesierra\AdventOfCode2020\Day15;
 use maesierra\AdventOfCode2020\Day16;
 use maesierra\AdventOfCode2020\Day17;
 use maesierra\AdventOfCode2020\Day18;
+use maesierra\AdventOfCode2020\Day19;
 use maesierra\AdventOfCode2020\Day2;
 use maesierra\AdventOfCode2020\Day20;
 use maesierra\AdventOfCode2020\Day21;
@@ -194,6 +195,12 @@ $app->add(runQuestion(18, 1, function($file) {
 }));
 $app->add(runQuestion(18, 2, function($file) {
     return (new Day18())->question2($file);
+}));
+$app->add(runQuestion(19, 1, function($file) {
+    return (new Day19())->question1($file);
+}));
+$app->add(runQuestion(19, 2, function($file) {
+    return (new Day19())->question2($file);
 }));
 $app->add(runQuestion(20, 1, function($file) {
     return (new Day20())->question1($file);

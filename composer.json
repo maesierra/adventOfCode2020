@@ -18,6 +18,7 @@
     "require": {
         "symfony/console": "v3.4.47",
         "phpunit/phpunit": "9.3.8",
-        "farafiri/php-parsing-tool": "^2.0"
+        "farafiri/php-parsing-tool": "^2.0",
+        "ext-intl": "*"
     }
 }

@@ -74,4 +74,26 @@ class Tile {
         }
     }
 
+    public function isBlack():bool {
+        return $this->colour == Tile::COLOUR_BLACK;
+    }
+
+    public function isWhite():bool {
+        return $this->colour == Tile::COLOUR_WHITE;
+    }
+
+    public function isBorder(): bool {
+        return array_filter($this->connected, function($t) {
+            return is_null($t);
+        }) ? true : false;
+    }
+
+    public static function neighbour($direction, $distance = 1): string {
+        $nDirection = count(self::ALL_DIRECTIONS);
+        $pos = array_search($direction, self::ALL_DIRECTIONS) + $distance;
+        $pos = $pos < 0 ? $nDirection + $pos : $pos;
+        $pos = $pos >= $nDirection ? $pos - $nDirection : $pos;
+        return self::ALL_DIRECTIONS[$pos];
+    }
+
 }

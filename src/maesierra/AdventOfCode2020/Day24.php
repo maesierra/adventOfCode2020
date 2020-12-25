@@ -11,35 +11,43 @@ class Day24 {
 
     /**
      * @param string $inputFile
-     * @return int
+     * @return array
      * @throws Exception
      */
-    public function question1(string $inputFile):int {
-        $count = 0;
-        /** @var string[][] $directions */
-        $directions = $this->readDirections($inputFile);
-        $center = $this->createGrid(100);
-        foreach ($directions as $pos => $direction) {
-            echo "$pos => Moving to ".implode(",", $direction)."\n";
-            $tile = $center;
-            foreach ($direction as $move => $next) {
-                $tile = $tile->connected[$next];
-                if (!$tile) {
-                    throw new Exception("Grid not big enough");
+    private function readDirections(string $inputFile): array {
+        return array_reduce(explode("\n", file_get_contents($inputFile)), function(&$res, $line)  {
+            if (!trim($line)) {
+                return $res;
+            }
+            $original = $line;
+            $directions = [];
+            while ($line) {
+                $direction = substr($line, 0, 1);
+                if (in_array($direction, [Tile::DIRECTION_E, Tile::DIRECTION_W])) {
+                    $directions[] = $direction;
+                    $line = substr($line, 1);
+                } else {
+                    $directions[] = substr($line, 0, 2);
+                    $line = substr($line, 2);
                 }
             }
-            $tile->flip();
-            echo "{$tile->id} flipped to {$tile->colour}\n";
-            if ($tile->colour == Tile::COLOUR_BLACK) {
-                $count++;
-            } else {
-                $count--;
+            $check = array_reduce(array_unique($directions), function($res, $d) {
+                return $res && in_array($d, Tile::ALL_DIRECTIONS);
+            }, true);
+            if ($check != Tile::ALL_DIRECTIONS || implode("", $directions) != $original) {
+                throw new Exception("Invalid line parsed $original");
             }
-        }
-        return $count;
+            $res[] = $directions;
+            return $res;
+
+        }, []);
     }
 
-    public function createGrid($size):Tile {
+    /**
+     * @param $size
+     * @return Tile
+     */
+    private function createGrid($size):Tile {
         $prevRow = null;
         $start = null;
         for ($j = 0; $j < $size; $j++) {
@@ -84,36 +92,115 @@ class Day24 {
     }
 
     /**
-     * @param string $inputFile
-     * @return array
+     * @param Tile $center
+     * @param array $direction
+     * @return Tile
      * @throws Exception
      */
-    private function readDirections(string $inputFile): array {
-        return array_reduce(explode("\n", file_get_contents($inputFile)), function(&$res, $line)  {
-            if (!trim($line)) {
-                return $res;
+    private function moveTo(Tile $center, array $direction): Tile
+    {
+        $tile = $center;
+        foreach ($direction as $move => $next) {
+            $tile = $tile->connected[$next];
+            if (!$tile) {
+                throw new Exception("Grid not big enough");
             }
-            $original = $line;
-            $directions = [];
-            while ($line) {
-                $direction = substr($line, 0, 1);
-                if (in_array($direction, [Tile::DIRECTION_E, Tile::DIRECTION_W])) {
-                    $directions[] = $direction;
-                    $line = substr($line, 1);
-                } else {
-                    $directions[] = substr($line, 0, 2);
-                    $line = substr($line, 2);
+        }
+        return $tile;
+    }
+
+    /**
+     * @param Tile[] $blackTiles
+     * @return Tile[]
+     * @throws Exception
+     */
+    private function applyRules(array $blackTiles):array {
+        $flip = [];
+        foreach ($blackTiles as $id => $tile) {
+            if ($tile->isBorder()) {
+                throw new Exception("Grid nto big enough");
+            }
+            /** @var Tile[] $whiteNeighbours */
+            $whiteNeighbours = array_filter($tile->connected, function($t) {
+                /** @var Tile $t */
+               return $t->isWhite();
+            });
+            if (count($whiteNeighbours) == 6 /*zero black*/ || count($whiteNeighbours) < 4 /*more then 2 blacks*/) {
+                $flip[$tile->id] = $tile;
+            }
+            //Iterate the white neighbours to see if we need to flip them
+            foreach ($whiteNeighbours as $t) {
+                if ($t->isBorder()) {
+                    throw new Exception("Grid nto big enough");
+                }
+                $countBlack = array_reduce($t->connected, function($c, $n) {
+                    /** @var $n Tile */
+                    return $c + ($n->isBlack() ? 1 : 0);
+                }, 0);
+                if ($countBlack == 2 && !isset($flip[$t->id])) {
+                    $flip[$t->id] = $t;
                 }
             }
-            $check = array_reduce(array_unique($directions), function($res, $d) {
-                return $res && in_array($d, Tile::ALL_DIRECTIONS);
-            }, true);
-            if ($check != Tile::ALL_DIRECTIONS || implode("", $directions) != $original) {
-                throw new Exception("Invalid line parsed $original");
+        }
+        foreach ($flip as $tile) {
+            $tile->flip();
+            if ($tile->isBlack()) {
+                $blackTiles[$tile->id] = $tile;
+            } else {
+                unset($blackTiles[$tile->id]);
             }
-            $res[] = $directions;
-            return $res;
-
-        }, []);
+            echo "{$tile->id} flipped to {$tile->colour}\n";
+        }
+        return $blackTiles;
     }
+
+    /**
+     * @param string $inputFile
+     * @return int
+     * @throws Exception
+     */
+    public function question1(string $inputFile):int {
+        $count = 0;
+        /** @var string[][] $directions */
+        $directions = $this->readDirections($inputFile);
+        $center = $this->createGrid(100);
+        foreach ($directions as $pos => $direction) {
+            echo "$pos => Moving to " . implode(",", $direction) . "\n";
+            $tile = $this->moveTo($center, $direction);
+            $tile->flip();
+            echo "{$tile->id} flipped to {$tile->colour}\n";
+            $count += $tile->isBlack() ? 1 : -1;
+        }
+        return $count;
+    }
+
+    /**
+     * @param string $inputFile
+     * @param int $nDays
+     * @return int
+     * @throws Exception
+     */
+    public function question2(string $inputFile, int $nDays, $gridSize = 100): int {
+        /** @var string[][] $directions */
+        $directions = $this->readDirections($inputFile);
+        $center = $this->createGrid($gridSize);
+        $blackTiles = [];
+        foreach ($directions as $pos => $direction) {
+            $tile = $this->moveTo($center, $direction);
+            $tile->flip();
+            if ($tile->isBlack()) {
+                $blackTiles[$tile->id] = $tile;
+            } else {
+                unset($blackTiles[$tile->id]);
+            }
+            echo "{$tile->id} flipped to {$tile->colour}\n";
+        }
+
+        for ($day = 1; $day <= $nDays; $day++) {
+            echo "Day $day\n";
+            $blackTiles = $this->applyRules($blackTiles);
+        }
+        return count($blackTiles);
+    }
+
 }

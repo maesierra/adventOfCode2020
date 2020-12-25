@@ -21,6 +21,15 @@ class Day24Test extends TestCase {
 
     public function testQuestion2() {
         $inputFile = __DIR__ . DIRECTORY_SEPARATOR . "Day24.txt";
-        $this->assertEquals("mxmxvkd,sqjhc,fvjkl", (new Day24())->question2($inputFile));
+        $day24 = new Day24();
+        $this->assertEquals(15, $day24->question2($inputFile, 1));
+        $this->assertEquals(12, $day24->question2($inputFile, 2));
+        $this->assertEquals(25, $day24->question2($inputFile, 3));
+        $this->assertEquals(14, $day24->question2($inputFile, 4));
+        $this->assertEquals(259, $day24->question2($inputFile, 30));
+        $this->assertEquals(406, $day24->question2($inputFile, 40));
+        $this->assertEquals(1373, $day24->question2($inputFile, 80));
+        $this->assertEquals(1844, $day24->question2($inputFile, 90));
+        $this->assertEquals(2208, $day24->question2($inputFile, 100));
     }
 }

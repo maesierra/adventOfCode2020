@@ -219,6 +219,9 @@ $app->add(runQuestion(23, 2, function($file) {
 $app->add(runQuestion(24, 1, function($file) {
     return (new Day24())->question1($file);
 }));
+$app->add(runQuestion(24, 2, function($file) {
+    return (new Day24())->question2($file, 100, 200);
+}));
 $app->add(runQuestion(25, 1, function($file) {
     return (new Day25())->question1($file);
 }));

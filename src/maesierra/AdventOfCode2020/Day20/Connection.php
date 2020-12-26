@@ -37,20 +37,4 @@ class Connection {
         $this->fromType = $fromType;
     }
 
-    /**
-     * @param $tile Tile
-     * @param $border string
-     * @param string|null $type
-     * @return bool
-     */
-    public function canConnect(Tile $tile, string $border, ?string $type): bool {
-        foreach ($tile->connections[$border] as $connection) {
-            /** @var Connection $connection */
-            if ($connection->to->id == $this->from->id && (!$type || $connection->toType == $type)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

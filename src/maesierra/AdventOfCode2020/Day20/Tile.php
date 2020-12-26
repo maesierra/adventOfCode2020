@@ -11,6 +11,7 @@ class Tile {
     const BORDER_LEFT = 'L';
     const BORDER_RIGHT = 'R';
 
+
     /** @var string[][] */
     public $borders;
     /** @var Connection[] */
@@ -80,7 +81,6 @@ class Tile {
         ];
         $this->connections = [];
     }
-
     /**
      * @param Tile $tile
      * @param $borderType

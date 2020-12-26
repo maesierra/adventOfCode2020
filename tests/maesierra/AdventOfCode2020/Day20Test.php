@@ -9,6 +9,7 @@
 namespace maesierra\AdventOfCode2020;
 
 
+use maesierra\AdventOfCode2020\Day20\Connection;
 use PHPUnit\Framework\TestCase;
 
 class Day20Test extends TestCase {
@@ -19,7 +20,89 @@ class Day20Test extends TestCase {
     }
 
     public function testQuestion2() {
-        $inputFile = __DIR__ . DIRECTORY_SEPARATOR . "Day18.txt";
-        $this->assertEquals(694173, (new Day18())->question2($inputFile));
+        $inputFile = __DIR__ . DIRECTORY_SEPARATOR . "Day20.txt";
+        $this->assertEquals(273, (new Day20())->question2($inputFile));
+    }
+
+    public function testRotate() {
+        $image = [
+            ['#', '.', '#', '#'],
+            ['.', '.', '#', '.'],
+            ['.', '#', '#', '#'],
+            ['#', '#', '#', '#'],
+        ];
+
+        $this->assertEquals(
+            [
+                ['#', '#', '.', '#'],
+                ['.', '#', '.', '.'],
+                ['#', '#', '#', '.'],
+                ['#', '#', '#', '#'],
+            ],
+            Day20::rotate($image, Connection::CONNECTION_FLIP_X)
+        );
+        $this->assertEquals(
+            [
+                ['#', '#', '#', '#'],
+                ['.', '#', '#', '#'],
+                ['.', '.', '#', '.'],
+                ['#', '.', '#', '#'],
+            ],
+            Day20::rotate($image, Connection::CONNECTION_FLIP_Y)
+        );
+
+        $this->assertEquals(
+            [
+                ['#', '.', '.', '#'],
+                ['#', '#', '.', '.'],
+                ['#', '#', '#', '#'],
+                ['#', '#', '.', '#'],
+            ],
+            Day20::rotate($image, Connection::CONNECTION_ROTATED90)
+        );
+        $this->assertEquals(
+            [
+                ['#', '#', '#', '#'],
+                ['#', '#', '#', '.'],
+                ['.', '#', '.', '.'],
+                ['#', '#', '.', '#'],
+            ],
+            Day20::rotate($image, Connection::CONNECTION_ROTATED180)
+        );
+
+        $this->assertEquals(
+            [
+                ['#', '.', '#', '#'],
+                ['#', '#', '#', '#'],
+                ['.', '.', '#', '#'],
+                ['#', '.', '.', '#'],
+            ],
+            Day20::rotate($image, Connection::CONNECTION_ROTATED270)
+        );
+
+
+        $this->assertEquals(
+            [
+                ['#', '.', '.', '#'],
+                ['.', '.', '#', '#'],
+                ['#', '#', '#', '#'],
+                ['#', '.', '#', '#'],
+            ],
+            Day20::rotate($image, Connection::CONNECTION_ROTATED90_FLIP_X)
+        );
+
+        $this->assertEquals(
+            [
+                ['#', '#', '.', '#'],
+                ['#', '#', '#', '#'],
+                ['#', '#', '.', '.'],
+                ['#', '.', '.', '#'],
+            ],
+            Day20::rotate($image, Connection::CONNECTION_ROTATED90_FLIP_Y)
+        );
+
+
+
+
     }
 }

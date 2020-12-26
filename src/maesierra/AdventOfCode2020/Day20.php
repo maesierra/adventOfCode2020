@@ -16,6 +16,14 @@ use maesierra\AdventOfCode2020\Day20\Tile;
 
 class Day20 {
 
+    const MONSTER = [
+        [18 => '#'],
+        [0 => '#', 5 =>'#', 6=> '#', 11 => '#', 12 => '#', 17 =>'#',18 => '#', 19 =>'#'],
+        [1 => '#', 4=> '#', 7 => '#', 10 => '#', 13 => '#', 16 => '#'],
+    ];
+    const MONSTER_WIDTH = 20;
+    const MONSTER_HEIGHT = 3;
+
     /**
      * @param $inputFile
      * @return Tile[]
@@ -40,6 +48,115 @@ class Day20 {
     }
 
     public function question1($inputFile):int {
+        $grid = $this->createGrid($inputFile);
+        if ($grid) {
+            echo "\n------------ Found!!! ---------------\n";
+            echo "{$this->gridToString($grid)}\n";
+            $len = count($grid);
+            return $grid[0][0]->tile->id *
+                $grid[0][$len - 1]->tile->id *
+                $grid[$len - 1][0]->tile->id *
+                $grid[$len - 1][$len - 1]->tile->id;
+        }
+        return 0;
+    }
+
+    public function question2($inputFile):int {
+        $grid = $this->createGrid($inputFile);
+        $tileSize = count($grid[0][0]->toImage());
+        /** @var string[][] $image */
+        $image = [];
+        foreach ($grid as $i => $tiles) {
+            foreach ($tiles as $j => $tile) {
+                $toImage = self::rotate($tile->toImage(), $tile->rotation);
+                foreach ($toImage as $x => $row) {
+                    $destRow = $i * $tileSize + $x;
+                    $currentRow = $image[$destRow] ?? [];
+                    $image[$destRow] = array_merge($currentRow, $row);
+                }
+            }
+        }
+        $rotations = [Connection::CONNECTION_FLIP_X, Connection::CONNECTION_FLIP_Y, Connection::CONNECTION_ROTATED90, Connection::CONNECTION_ROTATED180, Connection::CONNECTION_ROTATED270, Connection::CONNECTION_ROTATED90_FLIP_X, Connection::CONNECTION_ROTATED90_FLIP_Y, Connection::CONNECTION_NORMAL];
+        $imageHeight = count($image);
+        $imageWidth = count($image[0]);
+        foreach ($rotations as $rotation) {
+            $transformed = self::rotate($image, $rotation);
+            $found = false;
+            for ($y = 0; $y < $imageHeight - self::MONSTER_HEIGHT; $y++) {
+                for ($x = 0; $x < $imageWidth - self::MONSTER_WIDTH; $x++) {
+                    $withMonster = $this->locateMonster($transformed, $x, $y);
+                    if ($withMonster) {
+                        $found = true;
+                        $transformed = $withMonster;
+                    }
+                }
+            }
+            if ($found) {
+                echo "---------------------------------------------\n";
+                echo "---------------------------------------------\n";
+                echo "With monsters: \n";
+                echo "---------------------------------------------\n";
+                echo implode("\n", array_map(function($r) {
+                    return implode("", $r);
+                }, $transformed))."\n";
+                return array_sum(array_map(function($r) {
+                    return count(array_filter($r, function($p) {
+                        return $p == '#';
+                    }));
+                }, $transformed));
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * @param string[][] $image
+     * @param $rotation
+     * @return string[][]
+     */
+    public static function rotate(array $image, $rotation): array {
+        $newImage = [];
+        $len = count($image);
+        switch ($rotation) {
+            case Connection::CONNECTION_FLIP_X:
+                for ($y = 0; $y < $len; $y++) {
+                    $newImage[$y] = array_reverse($image[$y]);
+                }
+                break;
+            case Connection::CONNECTION_FLIP_Y:
+                $newImage = array_reverse($image);
+                break;
+            case Connection::CONNECTION_ROTATED90:
+                $newImage = array_map(function ($y) use($image, $len) {
+                    return array_reverse(array_column($image, $y));
+                }, array_keys($image));
+                break;
+            case Connection::CONNECTION_ROTATED270:
+                $newImage = array_reverse(array_map(function ($y) use($image, $len) {
+                    return array_column($image, $y);
+                }, array_keys($image)));
+                break;
+            case Connection::CONNECTION_ROTATED180:
+                $newImage = array_reverse(self::rotate($image, Connection::CONNECTION_FLIP_X));
+                break;
+            case Connection::CONNECTION_ROTATED90_FLIP_Y:
+                $newImage = self::rotate($image, Connection::CONNECTION_ROTATED90);
+                $newImage = array_reverse($newImage);
+                break;
+            case Connection::CONNECTION_ROTATED90_FLIP_X:
+                $newImage = array_map(function ($y) use($image, $len) {
+                    return array_column($image, $y);
+                }, array_keys($image));
+                break;
+            default:
+                $newImage = $image;
+                break;
+        }
+        return $newImage;
+    }
+
+
+    public function createGrid(string $inputFile):array {
         $tiles = $this->readTiles($inputFile);
         $borders = [Tile::BORDER_TOP, Tile::BORDER_BOTTOM, Tile::BORDER_LEFT, Tile::BORDER_RIGHT];
         foreach ($tiles as $tile) {
@@ -64,18 +181,12 @@ class Day20 {
             return in_array($v, $byBorder[Tile::BORDER_RIGHT]);
         });
         foreach ($candidates as $tile) {
-            $grid = $this->createGrid($tiles[$tile], $tiles);
+            $grid = $this->gridAttempt($tiles[$tile], $tiles);
             if ($grid) {
-                echo "\n------------ Found!!! ---------------\n";
-                echo "{$this->gridToString($grid)}\n";
-                $len = count($grid);
-                return $grid[0][0]->tile->id *
-                       $grid[0][$len - 1]->tile->id *
-                       $grid[$len - 1][0]->tile->id *
-                       $grid[$len - 1][$len - 1]->tile->id;
+                return $grid;
             }
         }
-        return 0;
+        return [];
     }
 
     /**
@@ -83,7 +194,7 @@ class Day20 {
      * @param $tiles Tile[]
      * @return PlacedTile[][]
      */
-    private function createGrid(Tile $startTile, array $tiles): array {
+    private function gridAttempt(Tile $startTile, array $tiles): array {
         $len = (int) ceil(sqrt(count($tiles)));
         /** @var PlacedTile[][][] $stack */
         $stack = [];
@@ -203,6 +314,7 @@ class Day20 {
         return $options;
     }
 
+
     /**
      * @param array $grid
      * @return string
@@ -213,6 +325,25 @@ class Day20 {
             return implode("  ", $g);
         }, $grid));
         return $text;
+    }
+
+    /**
+     * @param string[][] $image
+     * @param int $x
+     * @param int $y
+     * @return array
+     */
+    private function locateMonster(array $image, int $x, int $y): array {
+        $copy = $image;
+        foreach (self::MONSTER as $i => $monsterRow) {
+            foreach ($monsterRow as $j => $pixel) {
+                if ($image[$y + $i][$x + $j] != '#') {
+                    return [];
+                }
+                $copy[$y + $i][$x + $j] = 'O';
+            }
+        }
+        return $copy;
     }
 
 

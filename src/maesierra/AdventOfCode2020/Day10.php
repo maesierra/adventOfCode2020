@@ -9,38 +9,8 @@
 namespace maesierra\AdventOfCode2020;
 
 
-class Node {
-    /** @var Node[] */
-    public $next;
-    public $parent;
-    public $value;
 
-    /**
-     * Node constructor.
-     * @param $value
-     */
-    public function __construct($value, $parent) {
-        $this->value = $value;
-        $this->parent = $parent;
-    }
-
-
-    public function expand(&$acc = []) {
-        if (!$this->next) {
-            $node = $this;
-            while ($node) {
-                $branch[] = $node->value;
-                $node = $node->parent;
-            }
-            $acc[] = $branch;
-        } else {
-            foreach ($this->next as $node) {
-                $node->expand($acc);
-            }
-        }
-    }
-
-}
+use maesierra\AdventOfCode2020\Day10\Node;
 
 class Day10 {
 
@@ -68,6 +38,7 @@ class Day10 {
     public function question2(string $inputFile):int {
         $numbers = explode("\n", file_get_contents($inputFile));
         sort($numbers);
+        array_unshift($numbers, 0);
         $numbers[] = end($numbers) + 3;
         $this->countCache = [];
         $node = $this->createTree($numbers);
@@ -87,13 +58,11 @@ class Day10 {
         $next = 0;
         $joltages = array_combine($joltages, $joltages);
         $res = [1 => 0, 2 => 0, 3 => 1];
-        $chain = [];
         $current = 0;
         while ($next < $max) {
             foreach (array_keys($res) as $diff) {
                 $next = $joltages[$current + $diff] ?? 0;
                 if ($next) {
-                    $chain[] = $next;
                     $res[$diff]++;
                     $current = $next;
                     break;
@@ -102,27 +71,6 @@ class Day10 {
             }
         }
         return $res;
-    }
-
-    public function calculateChains( array $chain) {
-        $startingValue = $chain[0];
-        $result = $this->cache[$startingValue] ?? null;
-        if ($result) {
-            return $result;
-        }
-        if (count($chain) == 2) {
-            return  $chain[1];
-        }
-        $candidates = array_filter(array_slice($chain, 1, 3), function($n) use($startingValue) {
-            $diff = $n - $startingValue;
-            return $diff >= 1 && $diff <= 3;
-        });
-        $result = array_reduce($candidates, function (&$result, $next) use($chain) {
-            $result[$next] = $this->calculateChains(array_slice($chain, array_search($next, $chain)));
-            return $result;
-        }, []);
-        $this->cache[$startingValue] = $result;
-        return $result;
     }
 
 
@@ -151,7 +99,7 @@ class Day10 {
         return $node;
     }
 
-    public function count(Node $node) {
+    public function count(Node $node): int {
         echo "counting node {$node->value}...\n";
         $result = $this->countCache[$node->value] ?? 0;
         if (!$result) {
